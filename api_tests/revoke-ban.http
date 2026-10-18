@@ -1,0 +1,2 @@
+PUT http://localhost:8080/revokeban/3
+Authorization: 

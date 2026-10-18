@@ -1,0 +1,7 @@
+DELETE http://localhost:8080/revokePermban
+Authorization: 
+Content-Type: application/json
+
+{
+    "IP":"108.173.67.132"
+}

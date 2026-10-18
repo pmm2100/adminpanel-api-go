@@ -1,0 +1,2 @@
+PUT http://localhost:8080/ban/3
+Authorization: 

@@ -1,0 +1,9 @@
+PUT http://localhost:8080/updateadmin/1
+Authorization: 
+Content-Type: application/json
+
+{
+    "username":"helloworld",
+    "password":"123456",
+    "email":"test123@gmail.com"
+}

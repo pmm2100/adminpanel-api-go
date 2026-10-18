@@ -1,0 +1,7 @@
+PUT http://localhost:8080/update
+Authorization:
+
+{
+    "username":"test123",
+    "password":"123456"
+}
