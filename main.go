@@ -17,4 +17,5 @@ func main() {
 	server := gin.Default()
 	routes.ChechForRoutes(server)
 	server.Run(os.Getenv("PORT"))
+
 }

@@ -30,4 +30,6 @@ func ChechForRoutes(server *gin.Engine) {
 	authenticatedAdmin.GET("/getPermbanned", getPermBannedIPs)
 	authenticatedAdmin.PUT("/revokeban/:id", revokeBan)
 	authenticatedAdmin.DELETE("/revokePermban", revokePermBan)
+
+	server.GET("/sendVeryfication/:mail", sendMail)
 }

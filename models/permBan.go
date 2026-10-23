@@ -99,12 +99,12 @@ func CheckForBanned(id int64) (error, int) {
 	var banned int
 	row := db.DB.QueryRow(query, id)
 	row.Scan(&banned)
-	if banned == 1 {
+	switch banned {
+	case 1:
 		return nil, 1
-	} else if banned == 0 {
+	case 2:
 		return nil, 0
-	} else {
+	default:
 		return errors.New("Unexpected value of isbanned"), 0
 	}
-
 }
