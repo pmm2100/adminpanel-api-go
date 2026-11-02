@@ -8,6 +8,7 @@ import (
 func ChechForRoutes(server *gin.Engine) {
 
 	server.POST("/register", createUser)
+	server.POST("/register/verify", verifyUser)
 	server.POST("/login", loginUser)
 
 	server.POST("/register/admin", createAdmin)
@@ -31,5 +32,4 @@ func ChechForRoutes(server *gin.Engine) {
 	authenticatedAdmin.PUT("/revokeban/:id", revokeBan)
 	authenticatedAdmin.DELETE("/revokePermban", revokePermBan)
 
-	server.GET("/sendVeryfication/:mail", sendMail)
 }

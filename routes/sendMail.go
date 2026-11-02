@@ -1,28 +1,45 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 
+	"adminPanel.com/models"
 	"adminPanel.com/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
-func sendMail(context *gin.Context) {
-	email := string(context.Param("mail"))
+func verifyUser(context *gin.Context) {
+	type verifyEmail struct {
+		Email      string `binding:"required"`
+		Code       string `binding:"required"`
+		ActionType string `binding:"required"`
+	}
+	var verifyData verifyEmail
+	context.ShouldBindJSON(&verifyData)
 
-	headerSubject := "Subject: Testowy Temat\r\n"
-	headerTo := fmt.Sprintf("To: %s\r\n", email)
+	success, err := utils.VerifyCode(verifyData.Email, verifyData.Code, verifyData.ActionType)
 
-	body := "To jest treść wiadomości."
-
-	msg := []byte(headerSubject + headerTo + body)
-
-	err := utils.SendMail(email, msg)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not send mail", "err": err.Error()})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not check code", "err": err.Error()})
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{"message": "Mail send, check spam"})
+	if success {
+		user, err := models.GetUserBy("email", verifyData.Email)
+		if err != nil {
+			context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get data for this user"})
+			return
+		}
+
+		token, err := utils.GenerateJWT(user.ID, user.IsAdmin)
+		if err != nil {
+			context.JSON(http.StatusInternalServerError, gin.H{"message": "Problem with generating JWT, try again later!"})
+			return
+		}
+		context.JSON(http.StatusOK, gin.H{"message": "Account verified succesfully!", "token": token})
+
+	} else if !success {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Wrong code or the code is Expired"})
+	}
+
 }

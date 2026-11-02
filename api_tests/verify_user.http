@@ -1,0 +1,9 @@
+POST http://localhost:8080/register/verify
+Content-Type: application/json
+
+{
+    "email": "@gmail.com",
+    "code": "AAAAAA",
+    "actionType": "REGISTER"
+
+}

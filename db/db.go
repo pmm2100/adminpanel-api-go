@@ -32,7 +32,9 @@ func createTables() {
 			id INTEGER PRIMARY KEY,
 			username TEXT NOT NULL UNIQUE,
 			email TEXT NOT NULL UNIQUE,
+			verified INTEGER NOT NULL DEFAULT 0,
 			password TEXT NOT NULL,
+			date TEXT NOT NULL,
 			isadmin INTEGER NOT NULL DEFAULT 0,
 			isbanned INTEGER NOT NULL DEFAULT 0
 		)
@@ -55,6 +57,22 @@ func createTables() {
 
 	if err != nil {
 		panic(fmt.Errorf("Could not create permBanned table! \n %v", err))
+	}
+
+	createTableMailVeryfication := `
+		CREATE TABLE IF NOT EXISTS verify (
+			email TEXT NOT NULL,
+			code TEXT NOT NULL,
+			action_type TEXT NOT NULL,
+			date TEXT NOT NULL,
+			PRIMARY KEY (email, action_type)
+		)
+	`
+
+	_, err = DB.Exec(createTableMailVeryfication)
+
+	if err != nil {
+		panic(fmt.Errorf("Could not create verify table! \n %v", err))
 	}
 
 }

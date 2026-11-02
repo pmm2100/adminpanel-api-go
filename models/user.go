@@ -1,8 +1,10 @@
 package models
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"adminPanel.com/db"
 	"adminPanel.com/utils"
@@ -13,6 +15,8 @@ type UserLogin struct {
 	Username string `binding:"required"`
 	Email    string `binding:"required"`
 	Password string `binding:"required"`
+	verified int
+	date     string
 	IsAdmin  int
 	IsBanned int
 }
@@ -22,6 +26,8 @@ type User struct {
 	Username string `binding:"required"`
 	Email    string
 	Password string `binding:"required"`
+	verified int
+	date     string
 	IsAdmin  int
 	IsBanned int
 }
@@ -32,7 +38,7 @@ type Data struct {
 }
 
 func (u *UserLogin) RegisterUser() error {
-	query := "INSERT INTO users (username, email, password) VALUES (?,?,?)"
+	query := "INSERT INTO users (username, email, password, date) VALUES (?,?,?,?)"
 	stmt, err := db.DB.Prepare(query)
 	if err != nil {
 		return err
@@ -42,7 +48,11 @@ func (u *UserLogin) RegisterUser() error {
 	if err != nil {
 		return err
 	}
-	result, err := stmt.Exec(u.Username, u.Email, hash)
+
+	date := time.Now().UTC().Add(72 * time.Hour)
+	date_format := date.Format("2006-01-02 15:04:05")
+
+	result, err := stmt.Exec(u.Username, u.Email, hash, date_format)
 	if err != nil {
 		return err
 	}
@@ -75,6 +85,18 @@ func CheckLogIn(username string, password string) error {
 	} else if banned != 1 && banned != 0 {
 		return errors.New("Unexpected banned value")
 	}
+
+	query = "SELECT verified FROM users WHERE users.id = ?"
+	var verified int
+	err = db.DB.QueryRow(query, id).Scan(&verified)
+
+	if err == sql.ErrNoRows {
+		return errors.New("Could not find verified value")
+	}
+	if verified == 0 {
+		return errors.New("User is not verified")
+	}
+
 	ok := utils.ComparePasswordToHash(hash, password)
 	if !ok {
 		return errors.New("Invalid Password")
@@ -97,11 +119,11 @@ func GetUserBy(searchVal string, value any) (*User, error) {
 	}
 
 	query := fmt.Sprintf(
-		"SELECT id, username, email, password, isadmin, isbanned FROM users WHERE %v = ?",
+		"SELECT id, username, email, password, verified, date, isadmin, isbanned FROM users WHERE %v = ?",
 		searchVal,
 	)
 	row := db.DB.QueryRow(query, value)
-	err := row.Scan(&u.ID, &u.Username, &u.Email, &u.Password, &u.IsAdmin, &u.IsBanned)
+	err := row.Scan(&u.ID, &u.Username, &u.Email, &u.Password, &u.verified, &u.date, &u.IsAdmin, &u.IsBanned)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +144,7 @@ func GetUsersBy(searchVal string, value any) ([]*User, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var u User
-		err := rows.Scan(&u.ID, &u.Username, &u.Email, &u.Password, &u.IsAdmin, &u.IsBanned)
+		err := rows.Scan(&u.ID, &u.Username, &u.Email, &u.Password, &u.verified, &u.date, &u.IsAdmin, &u.IsBanned)
 		if err != nil {
 			return nil, err
 		}

@@ -24,15 +24,16 @@ func createUser(context *gin.Context) {
 	}
 	err = user.RegisterUser()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not register user, try again later!", "err": err.Error()})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not register user, try again later!"})
 		return
 	}
-	token, err := utils.GenerateJWT(user.ID, user.IsAdmin)
+	err = utils.SendAuthenitcationEmail(user.Email)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Problem with generating JWT, try again later!"})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not send mail"})
 		return
 	}
-	context.JSON(http.StatusCreated, gin.H{"message": "Account created!", "token": token})
+	context.JSON(http.StatusCreated, gin.H{"message": "Accont created, check your mailbox for veryfication email"})
+
 }
 
 func loginUser(context *gin.Context) {
@@ -49,7 +50,7 @@ func loginUser(context *gin.Context) {
 	}
 	err = models.CheckLogIn(user.Username, user.Password)
 	if err != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "Wrong username or Password!", "err": err.Error()})
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Wrong username or Password!"})
 		return
 	}
 	userData, err := models.GetUserBy("username", user.Username)
