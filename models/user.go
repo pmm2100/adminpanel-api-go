@@ -153,13 +153,22 @@ func GetUsersBy(searchVal string, value any) ([]*User, error) {
 	return userArr, nil
 }
 
-func (UpdatedUser *User) UpdateUserData(id int64) error {
+func (UpdatedUser *User) UpdateUserPassword(id int64) error {
 	query := "UPDATE users SET username=?, password=? WHERE id = ?"
 	hash, err := utils.HashPassword(UpdatedUser.Password)
 	if err != nil {
 		return err
 	}
 	_, err = db.DB.Exec(query, UpdatedUser.Username, hash, id)
+	if err != nil {
+		return err
+	}
+	userData, err := GetUserBy("id", id)
+	if err != nil {
+		return err
+	}
+	query = "DELETE FROM verify WHERE email=? AND action_type=?"
+	_, err = db.DB.Exec(query, userData.Email, "PASSWORDRESET")
 	if err != nil {
 		return err
 	}

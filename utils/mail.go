@@ -40,6 +40,42 @@ func SendAuthenitcationEmail(email string) error {
 
 }
 
+func SendPasswordResetEmail(email string) error {
+	headerSubject := "Subject: Password Reset\r\n"
+	headerTo := fmt.Sprintf("To: %s\r\n\r\n", email)
+	link := "" // add link to website here
+	body := fmt.Sprintf("To reset your password click this link %v", link)
+
+	msg := []byte(headerSubject + headerTo + body)
+
+	err := SendMail(string(email), []byte(msg))
+	if err != nil {
+		return err
+	}
+	date := time.Now().UTC().Add(15 * time.Minute)
+	date_format := date.Format("2006-01-02 15:04:05")
+	query := "INSERT INTO verify (email, action_type, date) VALUES (?,?,?)"
+	_, err = db.DB.Exec(query, email, "PASSWORDRESET", date_format)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func VerifyPasswordReset(email string) (bool, error) {
+	var dbEmail string
+	query := "SELECT email FROM verify WHERE email=? AND action_type=?"
+	err := db.DB.QueryRow(query, email, "PASSWORDRESET").Scan(&dbEmail)
+	if err == sql.ErrNoRows {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 func VerifyCode(email, code, actionType string) (bool, error) {
 	var dbEmail string
 	query := `

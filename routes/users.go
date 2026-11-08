@@ -76,7 +76,7 @@ func updateUser(context *gin.Context) {
 		return
 	}
 	userId := context.GetInt64("userId")
-	err = user.UpdateUserData(userId)
+	err = user.UpdateUserPassword(userId)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not update user data"})
 		return

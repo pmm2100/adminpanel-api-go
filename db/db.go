@@ -62,7 +62,7 @@ func createTables() {
 	createTableMailVeryfication := `
 		CREATE TABLE IF NOT EXISTS verify (
 			email TEXT NOT NULL,
-			code TEXT NOT NULL,
+			code TEXT,
 			action_type TEXT NOT NULL,
 			date TEXT NOT NULL,
 			PRIMARY KEY (email, action_type)

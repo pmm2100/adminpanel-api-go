@@ -17,7 +17,11 @@ func ChechForRoutes(server *gin.Engine) {
 	authenticated.Use(middlewares.Authenticate)
 
 	authenticated.DELETE("/delete", deleteaccount)
-	authenticated.PUT("/update", updateUser)
+	authenticated.GET("/passwordReset/:email", sendPasswordResetEmail)
+
+	authenticatedPasswordReset := server.Group("/")
+	authenticatedPasswordReset.Use(middlewares.AuthenticatePasswordReset)
+	authenticatedPasswordReset.PUT("/update", updateUser)
 
 	authenticatedAdmin := server.Group("/")
 	authenticatedAdmin.Use(middlewares.AuthenticateAdmin)

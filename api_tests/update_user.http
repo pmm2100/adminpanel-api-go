@@ -1,5 +1,5 @@
 PUT http://localhost:8080/update
-Authorization:
+Authorization: 
 
 {
     "username":"test123",

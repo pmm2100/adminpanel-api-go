@@ -102,7 +102,7 @@ func CheckForBanned(id int64) (error, int) {
 	switch banned {
 	case 1:
 		return nil, 1
-	case 2:
+	case 0:
 		return nil, 0
 	default:
 		return errors.New("Unexpected value of isbanned"), 0

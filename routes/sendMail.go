@@ -9,6 +9,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func sendPasswordResetEmail(context *gin.Context) {
+	email := context.Param("email")
+	err := utils.SendPasswordResetEmail(email)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not send password reset email", "err": err.Error()})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"message": "Password reset email send check your mailbox"})
+}
+
 func verifyUser(context *gin.Context) {
 	type verifyEmail struct {
 		Email      string `binding:"required"`
